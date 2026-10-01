@@ -37,9 +37,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8 bg-white text-[#111111] font-sans">
+    <div className="flex flex-col flex-1 p-12 bg-white font-sans items-center justify-start">
       
-      <main className="flex flex-col items-center max-w-3xl w-full">
+      <main className="flex flex-col items-center max-w-3xl w-full mt-12">
         
         {/* Header Section */}
         <h1 className="text-3xl font-medium mb-12 tracking-tight text-center">

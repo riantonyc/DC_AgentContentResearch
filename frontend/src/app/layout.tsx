@@ -17,13 +17,20 @@ export const metadata: Metadata = {
   description: "AI-Powered Content Research & Operations Platform",
 };
 
+import Sidebar from "@/components/Sidebar";
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex text-[#111111]">
+        <Sidebar />
+        <div className="flex-1 ml-64 flex flex-col min-h-screen">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }
