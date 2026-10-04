@@ -24,7 +24,7 @@ class IntentClassification(BaseModel):
 # Shared LLM instance
 def get_llm():
     return ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash", 
+        model="gemini-1.5-flash", 
         temperature=0,
         api_key=os.getenv("GEMINI_API_KEY")
     )
@@ -58,10 +58,23 @@ def process_chat(state: AgentState):
         return {"messages": [AIMessage(content=f"Error in Chat Agent: {str(e)}")], "actions_taken": ["Error handled"]}
 
 def process_research(state: AgentState):
-    """Handle research-heavy tasks (Phase 2 stub)."""
-    # TODO: Integrate Tavily / Web Scraper here
-    mock_response = AIMessage(content="[Research Agent] Memulai proses riset mendalam berdasarkan topik Anda... (Fitur Web Search akan segera diaktifkan).")
-    return {"messages": [mock_response], "actions_taken": ["Processed via Research Agent"]}
+    """Handle research-heavy tasks with real-time Web Search Grounding."""
+    from app.tools.search import perform_google_grounded_research
+    
+    last_user_message = state["messages"][-1]
+    query = last_user_message.content if hasattr(last_user_message, "content") else str(last_user_message)
+    
+    try:
+        research_result = perform_google_grounded_research(query)
+        response_content = research_result.get("content", "Gagal mendapatkan hasil riset.")
+        response = AIMessage(content=response_content)
+        return {
+            "messages": [response], 
+            "actions_taken": [f"Processed via Grounded Research Agent ({len(research_result.get('sources', []))} sources cited)"]
+        }
+    except Exception as e:
+        error_msg = AIMessage(content=f"⚠️ Gagal melakukan riset: {str(e)}")
+        return {"messages": [error_msg], "actions_taken": ["Research Agent Error"]}
 
 def process_plan(state: AgentState):
     """Handle Phase 3: Content Operations (Tasks, Calendar, Pipeline)."""

@@ -82,14 +82,17 @@ class Memory(Base):
 class Research(Base):
     __tablename__ = "research"
     id = Column(String, primary_key=True, index=True)
-    project_id = Column(String, ForeignKey("projects.id"))
+    project_id = Column(String, ForeignKey("projects.id"), nullable=True)
     query = Column(String)
+    title = Column(String, nullable=True)
+    category = Column(String, default="AI & Tech")
     summary = Column(Text, nullable=True)
+    full_content = Column(Text, nullable=True)
     key_points = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     project = relationship("Project", back_populates="researches")
-    sources = relationship("ResearchSource", back_populates="research")
+    sources = relationship("ResearchSource", back_populates="research", cascade="all, delete-orphan")
 
 class ResearchSource(Base):
     __tablename__ = "research_sources"
@@ -102,15 +105,71 @@ class ResearchSource(Base):
     
     research = relationship("Research", back_populates="sources")
 
+class ContentIdea(Base):
+    __tablename__ = "content_ideas"
+    id = Column(String, primary_key=True, index=True)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=True)
+    topic = Column(String)
+    format = Column(String, default="Short Video") # 'Short Video', 'LinkedIn', 'Thread', 'Article'
+    angle = Column(String)
+    hook = Column(Text)
+    outline = Column(JSON) # list of points
+    is_saved = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 # --- ACTIVITY TRACKING ---
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
     id = Column(String, primary_key=True, index=True)
-    user_id = Column(String, ForeignKey("users.id"))
-    action_type = Column(String) # e.g. "PERFORM_RESEARCH", "CREATE_IDEA", "UPDATE_MEMORY"
-    entity_type = Column(String, nullable=True) # e.g. "research", "memory", "project"
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    action_type = Column(String) # e.g. "PERFORM_RESEARCH", "CREATE_IDEA", "UPDATE_MEMORY", "SCRAPE_SOCIAL_STATS"
+    entity_type = Column(String, nullable=True) # e.g. "research", "memory", "project", "social_account_stats"
     entity_id = Column(String, nullable=True)
     details = Column(JSON, nullable=True) # payload info
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     user = relationship("User", back_populates="activities")
+
+# --- SOCIAL MEDIA ANALYTICS STATS ---
+class SocialAccountStats(Base):
+    __tablename__ = "social_account_stats"
+    id = Column(String, primary_key=True, index=True)
+    platform = Column(String) # 'instagram', 'tiktok'
+    username = Column(String) # '@kreator_rohani'
+    followers_count = Column(Integer, default=0)
+    total_likes = Column(Integer, default=0)
+    total_posts = Column(Integer, default=0)
+    engagement_rate = Column(Float, default=0.0)
+    is_manual = Column(Boolean, default=False)
+    raw_metrics = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+# --- CHRISTIAN CREATOR PERSONA & CUSTOM SCRIPT ---
+class UserPersona(Base):
+    __tablename__ = "user_personas"
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    creator_name = Column(String, default="Konten Kreator Rohani")
+    niche = Column(String, default="Renungan & Edukasi Rohani Kristen")
+    tone = Column(String, default="Warm & Gentle") # 'Warm & Gentle', 'Passionate & Bold', 'Youthful & Relatable', 'Deep & Exegetical'
+    target_audience = Column(String, default="Pemuda & Dewasa Muda")
+    preferred_format = Column(String, default="Reels / TikTok (<60s)")
+    bible_translation = Column(String, default="TB (Terjemahan Baru)")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class ContentScript(Base):
+    __tablename__ = "content_scripts"
+    id = Column(String, primary_key=True, index=True)
+    research_id = Column(String, ForeignKey("research.id"), nullable=True)
+    idea_id = Column(String, ForeignKey("content_ideas.id"), nullable=True)
+    title = Column(String)
+    hook = Column(Text)
+    bible_verse = Column(Text)
+    core_reflection = Column(Text)
+    call_to_action = Column(Text)
+    tone = Column(String)
+    format = Column(String) # 'Reels / TikTok', 'Carousel IG', 'Khotbah Pendek'
+    full_script = Column(Text)
+    status = Column(String, default="draft") # 'draft', 'scheduled', 'published'
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+

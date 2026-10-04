@@ -4,7 +4,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 def get_operations_llm():
     return ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash", 
+        model="gemini-1.5-flash", 
         temperature=0.2, # Lower temperature for operations and planning
         api_key=os.getenv("GEMINI_API_KEY")
     )
