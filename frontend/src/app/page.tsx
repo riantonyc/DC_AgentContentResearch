@@ -82,7 +82,7 @@ export default function Home() {
 
         {/* Response Display Area */}
         {response && (
-          <div className="w-full mt-8 p-6 bg-[#FAFAFA] border border-[#EAEAEA] rounded-xl text-[#111111]">
+          <div className="w-full mt-8 p-6 bg-[#FAFAFA] border border-[#EAEAEA] rounded-xl text-[#111111] whitespace-pre-wrap">
             <p>{response}</p>
           </div>
         )}
